@@ -2,6 +2,8 @@ package com.salarymanagement.domain;
 
 import jakarta.persistence.*;
 import java.time.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "employees")
@@ -30,6 +32,8 @@ public class Employee {
     private EmploymentStatus employmentStatus;
     @Column(name = "hire_date", nullable = false)
     private LocalDate hireDate;
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Compensation> compensations = new ArrayList<>();
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at", nullable = false)
@@ -128,5 +132,13 @@ public class Employee {
 
     public void setHireDate(LocalDate x) {
         hireDate = x;
+    }
+
+    public List<Compensation> getCompensations() {
+        return compensations;
+    }
+
+    public void setCompensations(List<Compensation> compensations) {
+        this.compensations = compensations;
     }
 }

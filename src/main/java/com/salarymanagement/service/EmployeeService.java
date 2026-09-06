@@ -5,6 +5,7 @@ import com.salarymanagement.dto.*;
 import com.salarymanagement.exception.*;
 import com.salarymanagement.repository.*;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 import java.math.*;
@@ -42,7 +43,8 @@ public class EmployeeService {
 
     public PageResponse<EmployeeResponse> list(String d, String c, EmploymentStatus s, String j, String cur,
             BigDecimal min, BigDecimal max, String q, Pageable p) {
-        return PageResponse.from(r.findAll(p).map(this::out));
+        Specification<Employee> spec = EmployeeSpecifications.filters(d, c, s, j, cur, min, max, q);
+        return PageResponse.from(r.findAll(spec, p).map(this::out));
     }
 
     public Employee entity(Long id) {
