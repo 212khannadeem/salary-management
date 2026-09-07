@@ -1,4 +1,4 @@
 package com.salarymanagement.dto;
 
-public record AnalyticsQueryResponse(String intent, Object result) {
+public record AnalyticsQueryResponse(String question, String intent, String summary, Object data) {
 }

@@ -92,8 +92,10 @@ class AnalyticsServiceTest {
 
         var result = service.answer("What is the average salary by department?");
 
+        assertThat(result.question()).isEqualTo("What is the average salary by department?");
         assertThat(result.intent()).isEqualTo("SALARY_BY_DEPARTMENT");
-        assertThat(result.result()).isEqualTo(List.of());
+        assertThat(result.summary()).contains("department");
+        assertThat(result.data()).isEqualTo(List.of());
     }
 
     @Test

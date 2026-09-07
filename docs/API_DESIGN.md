@@ -30,6 +30,26 @@ The optional question endpoint accepts a body such as:
 }
 ```
 
+Example response:
+
+```json
+{
+  "question": "What is the average salary by department?",
+  "intent": "SALARY_BY_DEPARTMENT",
+  "summary": "Salary averages, minimums, maximums, and employee counts grouped by department and currency.",
+  "data": [
+    {
+      "group": "Engineering",
+      "currency": "USD",
+      "employeeCount": 120,
+      "averageSalary": 105000.00,
+      "minSalary": 70000.00,
+      "maxSalary": 160000.00
+    }
+  ]
+}
+```
+
 It maps only to supported typed analytics intents. Unsupported questions return `400 UNSUPPORTED_ANALYTICS_QUERY`; no arbitrary SQL or external AI service is used.
 
 Example request:

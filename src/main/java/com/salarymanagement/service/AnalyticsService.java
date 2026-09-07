@@ -99,25 +99,38 @@ public class AnalyticsService {
     public AnalyticsQueryResponse answer(String question) {
         String normalized = question.trim().toLowerCase(Locale.ROOT);
         if (normalized.contains("department")) {
-            return new AnalyticsQueryResponse("SALARY_BY_DEPARTMENT", byDepartment());
+            return response(question, "SALARY_BY_DEPARTMENT",
+                    "Salary averages, minimums, maximums, and employee counts grouped by department and currency.",
+                    byDepartment());
         }
         if (normalized.contains("country")) {
-            return new AnalyticsQueryResponse("SALARY_BY_COUNTRY", byCountry());
+            return response(question, "SALARY_BY_COUNTRY",
+                    "Salary averages, minimums, maximums, and employee counts grouped by country and currency.",
+                    byCountry());
         }
         if (normalized.contains("job title") || normalized.contains("role")) {
-            return new AnalyticsQueryResponse("SALARY_BY_JOB_TITLE", byJobTitle());
+            return response(question, "SALARY_BY_JOB_TITLE",
+                    "Salary averages, minimums, maximums, and employee counts grouped by job title and currency.",
+                    byJobTitle());
         }
         if (normalized.contains("band")) {
-            return new AnalyticsQueryResponse("SALARY_BANDS", bands());
+            return response(question, "SALARY_BANDS",
+                    "Employee counts and percentages grouped into annual salary bands by currency.", bands());
         }
         if (normalized.contains("currency") || normalized.contains("currencies")) {
-            return new AnalyticsQueryResponse("SALARY_BY_CURRENCY", currencies());
+            return response(question, "SALARY_BY_CURRENCY",
+                    "Current employee counts and total annual base compensation grouped by currency.", currencies());
         }
         if (normalized.contains("range") || normalized.contains("highest") || normalized.contains("lowest")) {
-            return new AnalyticsQueryResponse("SALARY_RANGE", range());
+            return response(question, "SALARY_RANGE",
+                    "Minimum, maximum, average, and employee count for current annual salaries by currency.", range());
         }
         throw new ApiException("UNSUPPORTED_ANALYTICS_QUERY",
                 "Supported questions cover salary by department, country, job title, bands, currencies, and range");
+    }
+
+    private AnalyticsQueryResponse response(String question, String intent, String summary, Object data) {
+        return new AnalyticsQueryResponse(question, intent, summary, data);
     }
 
     private List<SalaryGroupSummary> summarizeBy(String fieldName) {
