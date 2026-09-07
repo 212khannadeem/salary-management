@@ -71,6 +71,20 @@ class AnalyticsServiceTest {
         });
     }
 
+    @Test
+    void annualizesMonthlySalaryBeforeCalculatingRanges() {
+        when(compensations.findAllWithEmployee()).thenReturn(List.of(
+                compensation(employee("Engineering", "India", "Developer", "USD"), new BigDecimal("10000"), "USD",
+                        PayFrequency.MONTHLY)));
+
+        var result = service.range();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().averageSalary()).isEqualByComparingTo("120000.00");
+        assertThat(result.getFirst().minimumSalary()).isEqualByComparingTo("120000.00");
+        assertThat(result.getFirst().maximumSalary()).isEqualByComparingTo("120000.00");
+    }
+
     private Employee employee(String department, String country, String jobTitle, String currency) {
         Employee employee = new Employee();
         employee.setDepartment(department);
@@ -82,13 +96,18 @@ class AnalyticsServiceTest {
     }
 
     private Compensation compensation(Employee employee, BigDecimal baseSalary, String currency) {
+        return compensation(employee, baseSalary, currency, PayFrequency.ANNUAL);
+    }
+
+    private Compensation compensation(Employee employee, BigDecimal baseSalary, String currency,
+            PayFrequency payFrequency) {
         Compensation compensation = new Compensation();
         compensation.setEmployee(employee);
         compensation.setBaseSalary(baseSalary);
         compensation.setCurrency(currency);
         compensation.setBonus(BigDecimal.ZERO);
         compensation.setAllowances(BigDecimal.ZERO);
-        compensation.setPayFrequency(PayFrequency.ANNUAL);
+        compensation.setPayFrequency(payFrequency);
         compensation.setEffectiveFrom(LocalDate.of(2024, 1, 1));
         compensation.setEffectiveTo(null);
         return compensation;

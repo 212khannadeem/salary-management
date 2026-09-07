@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AnalyticsService {
-    private static final LocalDate TODAY = LocalDate.now();
     private final EmployeeRepository employees;
     private final CompensationRepository compensations;
 
@@ -46,7 +45,7 @@ public class AnalyticsService {
         Map<String, Long> currencyTotals = new HashMap<>();
         for (Compensation compensation : currentCompensations()) {
             String currency = compensation.getCurrency();
-            String band = salaryBand(compensation.getBaseSalary());
+            String band = salaryBand(annualSalary(compensation));
             bandTotals.computeIfAbsent(currency, key -> new TreeMap<>()).merge(band, 1L, Long::sum);
             currencyTotals.merge(currency, 1L, Long::sum);
         }
@@ -68,7 +67,7 @@ public class AnalyticsService {
         Map<String, CurrencyAccumulator> totals = new TreeMap<>();
         for (Compensation compensation : currentCompensations()) {
             totals.computeIfAbsent(compensation.getCurrency(), key -> new CurrencyAccumulator())
-                    .add(compensation.getBaseSalary());
+                    .add(annualSalary(compensation));
         }
 
         return totals.entrySet().stream()
@@ -82,7 +81,7 @@ public class AnalyticsService {
         Map<String, SalaryAggregate> aggregateByCurrency = new TreeMap<>();
         for (Compensation compensation : currentCompensations()) {
             aggregateByCurrency.computeIfAbsent(compensation.getCurrency(), key -> new SalaryAggregate())
-                    .add(compensation.getBaseSalary());
+                    .add(annualSalary(compensation));
         }
 
         List<SalaryRangeSummary> result = new ArrayList<>();
@@ -135,7 +134,15 @@ public class AnalyticsService {
     private boolean isEffectiveToday(Compensation compensation) {
         LocalDate effectiveFrom = compensation.getEffectiveFrom();
         LocalDate effectiveTo = compensation.getEffectiveTo();
-        return !effectiveFrom.isAfter(TODAY) && (effectiveTo == null || !effectiveTo.isBefore(TODAY));
+        LocalDate today = LocalDate.now();
+        return !effectiveFrom.isAfter(today) && (effectiveTo == null || !effectiveTo.isBefore(today));
+    }
+
+    private BigDecimal annualSalary(Compensation compensation) {
+        if (compensation.getPayFrequency() == com.salarymanagement.domain.PayFrequency.MONTHLY) {
+            return compensation.getBaseSalary().multiply(BigDecimal.valueOf(12));
+        }
+        return compensation.getBaseSalary();
     }
 
     private String salaryBand(BigDecimal salary) {

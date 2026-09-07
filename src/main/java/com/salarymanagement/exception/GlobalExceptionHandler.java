@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -54,6 +55,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handle(MethodArgumentTypeMismatchException e, HttpServletRequest r) {
         String message = "Invalid value for parameter '" + e.getName() + "'";
         return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER", message, r.getRequestURI(), List.of());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handle(MissingServletRequestParameterException e, HttpServletRequest r) {
+        String message = "Required parameter '" + e.getParameterName() + "' is missing";
+        return buildResponse(HttpStatus.BAD_REQUEST, "MISSING_PARAMETER", message, r.getRequestURI(), List.of());
     }
 
     @ExceptionHandler(Exception.class)
