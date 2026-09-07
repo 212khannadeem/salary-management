@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.List;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -34,7 +35,13 @@ public class EmployeeSeedRunner implements ApplicationRunner {
             "Software Engineer", "Senior Developer", "Account Manager", "Analyst", "HR Manager", "Operations Lead",
             "Product Manager", "Sales Representative", "Customer Success Lead", "Finance Manager");
     private static final List<String> COUNTRIES = List.of("India", "United States", "United Kingdom", "Germany", "Canada", "Australia");
-    private static final List<String> CURRENCIES = List.of("USD", "EUR", "GBP", "INR");
+    private static final Map<String, String> COUNTRY_CURRENCIES = Map.of(
+            "India", "INR",
+            "United States", "USD",
+            "United Kingdom", "GBP",
+            "Germany", "EUR",
+            "Canada", "CAD",
+            "Australia", "AUD");
 
     private final EmployeeRepository employees;
     private final CompensationRepository compensations;
@@ -60,7 +67,7 @@ public class EmployeeSeedRunner implements ApplicationRunner {
             employee.setDepartment(DEPARTMENTS.get((i - 1) % DEPARTMENTS.size()));
             employee.setJobTitle(JOB_TITLES.get((i * 3) % JOB_TITLES.size()));
             employee.setCountry(COUNTRIES.get((i * 5) % COUNTRIES.size()));
-            employee.setCurrency(CURRENCIES.get((i * 11) % CURRENCIES.size()));
+            employee.setCurrency(COUNTRY_CURRENCIES.get(employee.getCountry()));
             employee.setEmploymentStatus(i % 10 == 0 ? EmploymentStatus.ON_LEAVE : EmploymentStatus.ACTIVE);
             employee.setHireDate(LocalDate.of(2014 + (i % 10), 1 + (i % 12), 1 + (i % 28)));
             employeeBatch.add(employee);
