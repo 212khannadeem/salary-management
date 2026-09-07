@@ -95,7 +95,7 @@ class AnalyticsServiceTest {
         assertThat(result.question()).isEqualTo("What is the average salary by department?");
         assertThat(result.intent()).isEqualTo("SALARY_BY_DEPARTMENT");
         assertThat(result.summary()).contains("department");
-        assertThat(result.answer()).contains("structured department");
+        assertThat(result.answer()).contains("No current salary data");
         assertThat(result.data()).isEqualTo(List.of());
     }
 

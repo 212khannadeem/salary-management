@@ -103,34 +103,40 @@ public class AnalyticsService {
             return countryWithMostEmployees(question);
         }
         if (normalized.contains("department")) {
+            List<SalaryGroupSummary> data = byDepartment();
             return response(question, "SALARY_BY_DEPARTMENT",
                     "Salary averages, minimums, maximums, and employee counts grouped by department and currency.",
-                    "The structured department salary results are available below.", byDepartment());
+                    groupAnswer("Average salary by department", data), data);
         }
         if (normalized.contains("country")) {
+            List<SalaryGroupSummary> data = byCountry();
             return response(question, "SALARY_BY_COUNTRY",
                     "Salary averages, minimums, maximums, and employee counts grouped by country and currency.",
-                    "The structured country salary results are available below.", byCountry());
+                    groupAnswer("Average salary by country", data), data);
         }
         if (normalized.contains("job title") || normalized.contains("role")) {
+            List<SalaryGroupSummary> data = byJobTitle();
             return response(question, "SALARY_BY_JOB_TITLE",
                     "Salary averages, minimums, maximums, and employee counts grouped by job title and currency.",
-                    "The structured job-title salary results are available below.", byJobTitle());
+                    groupAnswer("Average salary by job title", data), data);
         }
         if (normalized.contains("band")) {
+            List<SalaryBandSummary> data = bands();
             return response(question, "SALARY_BANDS",
                     "Employee counts and percentages grouped into annual salary bands by currency.",
-                    "The salary-band distribution is available below.", bands());
+                    bandAnswer(data), data);
         }
         if (normalized.contains("currency") || normalized.contains("currencies")) {
+            List<CurrencySummary> data = currencies();
             return response(question, "SALARY_BY_CURRENCY",
                     "Current employee counts and total annual base compensation grouped by currency.",
-                    "The organization uses the currencies listed below.", currencies());
+                    currencyAnswer(data), data);
         }
         if (normalized.contains("range") || normalized.contains("highest") || normalized.contains("lowest")) {
+            List<SalaryRangeSummary> data = range();
             return response(question, "SALARY_RANGE",
                     "Minimum, maximum, average, and employee count for current annual salaries by currency.",
-                    "The salary ranges are available below.", range());
+                    rangeAnswer(data), data);
         }
         throw new ApiException("UNSUPPORTED_ANALYTICS_QUERY",
                 "Supported questions cover salary by department, country, job title, bands, currencies, and range");
@@ -155,6 +161,47 @@ public class AnalyticsService {
     private AnalyticsQueryResponse response(String question, String intent, String summary, String answer,
             Object data) {
         return new AnalyticsQueryResponse(question, intent, summary, answer, data);
+    }
+
+    private String groupAnswer(String label, List<SalaryGroupSummary> data) {
+        if (data.isEmpty()) {
+            return "No current salary data is available.";
+        }
+        return label + ": " + data.stream()
+                .map(item -> item.group() + " (" + item.currency() + " "
+                        + item.averageSalary().toPlainString() + " average, "
+                        + item.employeeCount() + " employees)")
+                .collect(java.util.stream.Collectors.joining("; "));
+    }
+
+    private String bandAnswer(List<SalaryBandSummary> data) {
+        if (data.isEmpty()) {
+            return "No current salary-band data is available.";
+        }
+        return "Salary-band distribution: " + data.stream()
+                .map(item -> item.currency() + " " + item.band() + " "
+                        + item.employeeCount() + " employees (" + item.percentage().toPlainString() + "%)")
+                .collect(java.util.stream.Collectors.joining("; "));
+    }
+
+    private String currencyAnswer(List<CurrencySummary> data) {
+        if (data.isEmpty()) {
+            return "No current currency data is available.";
+        }
+        return "Currency distribution: " + data.stream()
+                .map(item -> item.currency() + " " + item.employeeCount() + " employees")
+                .collect(java.util.stream.Collectors.joining("; "));
+    }
+
+    private String rangeAnswer(List<SalaryRangeSummary> data) {
+        if (data.isEmpty()) {
+            return "No current salary-range data is available.";
+        }
+        return "Salary ranges: " + data.stream()
+                .map(item -> item.currency() + " average " + item.averageSalary().toPlainString()
+                        + ", minimum " + item.minimumSalary().toPlainString()
+                        + ", maximum " + item.maximumSalary().toPlainString())
+                .collect(java.util.stream.Collectors.joining("; "));
     }
 
     private List<SalaryGroupSummary> summarizeBy(String fieldName) {
