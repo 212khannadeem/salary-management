@@ -31,6 +31,9 @@ public class EmployeeController {
             @RequestParam(defaultValue = "25") int size, @RequestParam(defaultValue = "lastName,asc") String[] sort) {
         if (page < 0 || size < 1 || size > 100)
             throw new IllegalArgumentException("page must be >= 0 and size must be between 1 and 100");
+        if (minSalary != null && maxSalary != null && minSalary.compareTo(maxSalary) > 0) {
+            throw new IllegalArgumentException("minSalary must not be greater than maxSalary");
+        }
         return employees.list(department, country, status, jobTitle, currency, minSalary, maxSalary, q,
                 PageRequest.of(page, size, Sort.by(parseSort(sort))));
     }
@@ -85,7 +88,19 @@ public class EmployeeController {
     }
 
     private Sort.Order parseSort(String[] s) {
+        if (s == null || s.length == 0 || s[0].isBlank()) {
+            throw new IllegalArgumentException("sort must not be blank");
+        }
         String[] p = s[0].split(",");
+        Set<String> allowed = Set.of("employeeNumber", "firstName", "lastName", "department", "jobTitle",
+                "country", "currency", "employmentStatus", "hireDate");
+        if (!allowed.contains(p[0])) {
+            throw new IllegalArgumentException("Unsupported sort field: " + p[0]);
+        }
+        if (p.length > 2 || (p.length == 2 && !p[1].equalsIgnoreCase("asc")
+                && !p[1].equalsIgnoreCase("desc"))) {
+            throw new IllegalArgumentException("sort direction must be asc or desc");
+        }
         return new Sort.Order(p.length > 1 && p[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC,
                 p[0]);
     }

@@ -33,7 +33,14 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse update(Long id, EmployeeRequest x) {
-        return out(map(x, entity(id)));
+        Employee employee = entity(id);
+        if (r.existsByEmployeeNumberAndIdNot(x.employeeNumber(), id)) {
+            throw new ConflictException("DUPLICATE_EMPLOYEE_NUMBER", "Employee number already exists");
+        }
+        if (r.existsByEmailIgnoreCaseAndIdNot(x.email(), id)) {
+            throw new ConflictException("DUPLICATE_EMAIL", "Email already exists");
+        }
+        return out(map(x, employee));
     }
 
     @Transactional

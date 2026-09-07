@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -47,6 +48,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handle(IllegalArgumentException e, HttpServletRequest r) {
         return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", e.getMessage(), r.getRequestURI(), List.of());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handle(MethodArgumentTypeMismatchException e, HttpServletRequest r) {
+        String message = "Invalid value for parameter '" + e.getName() + "'";
+        return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER", message, r.getRequestURI(), List.of());
     }
 
     @ExceptionHandler(Exception.class)

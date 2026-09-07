@@ -2,6 +2,8 @@
 
 All endpoints are under `/api/v1`. Employee lists accept `page` (default 0), `size` (default 25, maximum 100), `sort`, `department`, `country`, `status`, `jobTitle`, `currency`, `minSalary`, `maxSalary`, and `q`.
 
+Employee list responses include both `number` (Spring-compatible page index) and the legacy `page` alias, plus `size`, `totalElements`, and `totalPages`. Sorting is limited to employee fields such as `lastName,asc` and `hireDate,desc`.
+
 | Endpoint | Purpose |
 | --- | --- |
 | `GET/POST /employees` | Search/list or create employees |
@@ -16,6 +18,8 @@ All endpoints are under `/api/v1`. Employee lists accept `page` (default 0), `si
 | `GET /analytics/salary/currencies` | Current compensation counts by currency |
 
 Errors contain `timestamp`, `status`, `code`, `message`, `path`, and optional field `details`.
+
+Local frontend requests from `http://localhost:5173` are allowed by default. Configure another origin with `APP_CORS_ALLOWED_ORIGIN`.
 
 Example request:
 
