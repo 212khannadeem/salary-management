@@ -95,7 +95,21 @@ class AnalyticsServiceTest {
         assertThat(result.question()).isEqualTo("What is the average salary by department?");
         assertThat(result.intent()).isEqualTo("SALARY_BY_DEPARTMENT");
         assertThat(result.summary()).contains("department");
+        assertThat(result.answer()).contains("structured department");
         assertThat(result.data()).isEqualTo(List.of());
+    }
+
+    @Test
+    void answersWhichCountryHasMostEmployees() {
+        when(compensations.findAllWithEmployee()).thenReturn(List.of(
+                compensation(employee("India", "India", "Developer", "INR"), new BigDecimal("60000"), "INR"),
+                compensation(employee("India", "India", "Analyst", "INR"), new BigDecimal("70000"), "INR"),
+                compensation(employee("Germany", "Germany", "Analyst", "EUR"), new BigDecimal("80000"), "EUR")));
+
+        var result = service.answer("Which country has the most employees?");
+
+        assertThat(result.intent()).isEqualTo("EMPLOYEE_COUNT_BY_COUNTRY");
+        assertThat(result.answer()).isEqualTo("India has the most employees with 2 employees.");
     }
 
     @Test

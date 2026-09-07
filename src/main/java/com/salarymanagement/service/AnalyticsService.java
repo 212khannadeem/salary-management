@@ -98,39 +98,63 @@ public class AnalyticsService {
 
     public AnalyticsQueryResponse answer(String question) {
         String normalized = question.trim().toLowerCase(Locale.ROOT);
+        if (normalized.contains("country")
+                && (normalized.contains("most employees") || normalized.contains("highest number of employees"))) {
+            return countryWithMostEmployees(question);
+        }
         if (normalized.contains("department")) {
             return response(question, "SALARY_BY_DEPARTMENT",
                     "Salary averages, minimums, maximums, and employee counts grouped by department and currency.",
-                    byDepartment());
+                    "The structured department salary results are available below.", byDepartment());
         }
         if (normalized.contains("country")) {
             return response(question, "SALARY_BY_COUNTRY",
                     "Salary averages, minimums, maximums, and employee counts grouped by country and currency.",
-                    byCountry());
+                    "The structured country salary results are available below.", byCountry());
         }
         if (normalized.contains("job title") || normalized.contains("role")) {
             return response(question, "SALARY_BY_JOB_TITLE",
                     "Salary averages, minimums, maximums, and employee counts grouped by job title and currency.",
-                    byJobTitle());
+                    "The structured job-title salary results are available below.", byJobTitle());
         }
         if (normalized.contains("band")) {
             return response(question, "SALARY_BANDS",
-                    "Employee counts and percentages grouped into annual salary bands by currency.", bands());
+                    "Employee counts and percentages grouped into annual salary bands by currency.",
+                    "The salary-band distribution is available below.", bands());
         }
         if (normalized.contains("currency") || normalized.contains("currencies")) {
             return response(question, "SALARY_BY_CURRENCY",
-                    "Current employee counts and total annual base compensation grouped by currency.", currencies());
+                    "Current employee counts and total annual base compensation grouped by currency.",
+                    "The organization uses the currencies listed below.", currencies());
         }
         if (normalized.contains("range") || normalized.contains("highest") || normalized.contains("lowest")) {
             return response(question, "SALARY_RANGE",
-                    "Minimum, maximum, average, and employee count for current annual salaries by currency.", range());
+                    "Minimum, maximum, average, and employee count for current annual salaries by currency.",
+                    "The salary ranges are available below.", range());
         }
         throw new ApiException("UNSUPPORTED_ANALYTICS_QUERY",
                 "Supported questions cover salary by department, country, job title, bands, currencies, and range");
     }
 
-    private AnalyticsQueryResponse response(String question, String intent, String summary, Object data) {
-        return new AnalyticsQueryResponse(question, intent, summary, data);
+    private AnalyticsQueryResponse countryWithMostEmployees(String question) {
+        List<SalaryGroupSummary> countryResults = byCountry();
+        Map<String, Long> employeeCounts = new TreeMap<>();
+        for (SalaryGroupSummary result : countryResults) {
+            employeeCounts.merge(result.group(), result.employeeCount(), Long::sum);
+        }
+        Map.Entry<String, Long> highest = employeeCounts.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .orElse(null);
+        String answer = highest == null
+                ? "No current employee compensation data is available."
+                : highest.getKey() + " has the most employees with " + highest.getValue() + " employees.";
+        return response(question, "EMPLOYEE_COUNT_BY_COUNTRY",
+                "Employee counts grouped by country.", answer, employeeCounts);
+    }
+
+    private AnalyticsQueryResponse response(String question, String intent, String summary, String answer,
+            Object data) {
+        return new AnalyticsQueryResponse(question, intent, summary, answer, data);
     }
 
     private List<SalaryGroupSummary> summarizeBy(String fieldName) {

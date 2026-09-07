@@ -37,6 +37,7 @@ Example response:
   "question": "What is the average salary by department?",
   "intent": "SALARY_BY_DEPARTMENT",
   "summary": "Salary averages, minimums, maximums, and employee counts grouped by department and currency.",
+  "answer": "The structured department salary results are available below.",
   "data": [
     {
       "group": "Engineering",
