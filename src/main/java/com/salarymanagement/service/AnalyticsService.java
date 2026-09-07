@@ -2,6 +2,7 @@ package com.salarymanagement.service;
 
 import com.salarymanagement.domain.Compensation;
 import com.salarymanagement.dto.CurrencySummary;
+import com.salarymanagement.dto.AnalyticsQueryResponse;
 import com.salarymanagement.dto.SalaryBandSummary;
 import com.salarymanagement.dto.SalaryGroupSummary;
 import com.salarymanagement.dto.SalaryRangeSummary;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Locale;
+import com.salarymanagement.exception.ApiException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -91,6 +94,30 @@ public class AnalyticsService {
                     aggregate.average(), aggregate.count()));
         }
         return result;
+    }
+
+    public AnalyticsQueryResponse answer(String question) {
+        String normalized = question.trim().toLowerCase(Locale.ROOT);
+        if (normalized.contains("department")) {
+            return new AnalyticsQueryResponse("SALARY_BY_DEPARTMENT", byDepartment());
+        }
+        if (normalized.contains("country")) {
+            return new AnalyticsQueryResponse("SALARY_BY_COUNTRY", byCountry());
+        }
+        if (normalized.contains("job title") || normalized.contains("role")) {
+            return new AnalyticsQueryResponse("SALARY_BY_JOB_TITLE", byJobTitle());
+        }
+        if (normalized.contains("band")) {
+            return new AnalyticsQueryResponse("SALARY_BANDS", bands());
+        }
+        if (normalized.contains("currency") || normalized.contains("currencies")) {
+            return new AnalyticsQueryResponse("SALARY_BY_CURRENCY", currencies());
+        }
+        if (normalized.contains("range") || normalized.contains("highest") || normalized.contains("lowest")) {
+            return new AnalyticsQueryResponse("SALARY_RANGE", range());
+        }
+        throw new ApiException("UNSUPPORTED_ANALYTICS_QUERY",
+                "Supported questions cover salary by department, country, job title, bands, currencies, and range");
     }
 
     private List<SalaryGroupSummary> summarizeBy(String fieldName) {

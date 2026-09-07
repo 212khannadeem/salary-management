@@ -16,10 +16,21 @@ Employee list responses include both `number` (Spring-compatible page index) and
 | `GET /analytics/salary/by-job-title` | Same, grouped by role and currency |
 | `GET /analytics/salary/bands` | Counts/percentages per configured annual salary band and currency |
 | `GET /analytics/salary/currencies` | Current compensation counts by currency |
+| `POST /analytics/query` | Controlled deterministic mapping for supported analytics questions |
 
 Errors contain `timestamp`, `status`, `code`, `message`, `path`, and optional field `details`.
 
 Local frontend requests from `http://localhost:5173` are allowed by default. Configure another origin with `APP_CORS_ALLOWED_ORIGIN`.
+
+The optional question endpoint accepts a body such as:
+
+```json
+{
+  "question": "What is the average salary by department?"
+}
+```
+
+It maps only to supported typed analytics intents. Unsupported questions return `400 UNSUPPORTED_ANALYTICS_QUERY`; no arbitrary SQL or external AI service is used.
 
 Example request:
 

@@ -1,13 +1,18 @@
 package com.salarymanagement.controller;
 
 import com.salarymanagement.dto.CurrencySummary;
+import com.salarymanagement.dto.AnalyticsQueryRequest;
+import com.salarymanagement.dto.AnalyticsQueryResponse;
 import com.salarymanagement.dto.SalaryBandSummary;
 import com.salarymanagement.dto.SalaryGroupSummary;
 import com.salarymanagement.dto.SalaryRangeSummary;
 import com.salarymanagement.service.AnalyticsService;
 import java.util.List;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -47,5 +52,10 @@ public class AnalyticsController {
     @GetMapping("/salary/range")
     public List<SalaryRangeSummary> range() {
         return analyticsService.range();
+    }
+
+    @PostMapping("/query")
+    public AnalyticsQueryResponse query(@Valid @RequestBody AnalyticsQueryRequest request) {
+        return analyticsService.answer(request.question());
     }
 }

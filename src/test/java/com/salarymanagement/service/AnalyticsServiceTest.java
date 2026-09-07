@@ -1,6 +1,7 @@
 package com.salarymanagement.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -83,6 +84,23 @@ class AnalyticsServiceTest {
         assertThat(result.getFirst().averageSalary()).isEqualByComparingTo("120000.00");
         assertThat(result.getFirst().minimumSalary()).isEqualByComparingTo("120000.00");
         assertThat(result.getFirst().maximumSalary()).isEqualByComparingTo("120000.00");
+    }
+
+    @Test
+    void mapsSupportedQuestionToTypedAnalyticsIntent() {
+        when(compensations.findAllWithEmployee()).thenReturn(List.of());
+
+        var result = service.answer("What is the average salary by department?");
+
+        assertThat(result.intent()).isEqualTo("SALARY_BY_DEPARTMENT");
+        assertThat(result.result()).isEqualTo(List.of());
+    }
+
+    @Test
+    void rejectsUnsupportedQuestion() {
+        assertThatThrownBy(() -> service.answer("Who should be promoted next?"))
+                .isInstanceOf(com.salarymanagement.exception.ApiException.class)
+                .hasMessageContaining("Supported questions");
     }
 
     private Employee employee(String department, String country, String jobTitle, String currency) {
